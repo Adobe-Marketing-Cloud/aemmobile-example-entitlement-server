@@ -1,0 +1,59 @@
+<div class="modal-header">
+    <h4 class="modal-title">Add Product</h4>
+</div>
+<div class="modal-body" ng-init="partialInitHandler()">
+  <form
+    ng-submit="ok_clickHandler()"
+    ui-keypress="{13:'ok_clickHandler()'}">
+    <div class="row">
+      <input
+        type="input"
+        class="required-dialog-form-input"
+        ng-model="form.pubName"
+        placeholder="Product Label"
+        required
+        ng-minlength="1">
+        <div class="required-icon">*</div>
+    </div>
+    <div class="row">
+      <input
+        type="input"
+        class="required-dialog-form-input"
+        ng-model="form.folioNumber"
+        placeholder="Product Description"
+        required
+        ng-minlength="1">
+        <div class="required-icon">*</div>
+    </div>
+    <div class="row">
+      <input
+        type="input"
+        class="required-dialog-form-input"
+        ng-model="form.productId"
+        placeholder="Product ID"
+        required
+        ng-minlength="1">
+        <div class="required-icon">*</div>
+    </div>
+    <div class="row">
+      <input
+        type="date"
+        class="required-dialog-form-input"
+        ng-model="form.pubDate"
+        ng-pattern="/[0-9]{4}[\/\-]{1}[0-9]{2}[\/\-]{1}[0-9]{2}/"
+        placeholder="Availability Date: YYYY-MM-DD">
+        <div class="required-icon">*</div>
+    <div class="dialog-error"
+      ng-bind="form.errorMessage">
+    </div>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <button
+    ng-click="cancel_clickHandler()">Cancel</button>
+  <button
+    class="ok-button"
+    ng-click="ok_clickHandler()"
+    ng-class="{'busy-cursor': form.isAddingFolio==true}">OK</button>
+</div>
