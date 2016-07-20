@@ -25,7 +25,7 @@
  * @example $db_name = "entitlement_admin";
  * Only change below if the database name was different than 'entitlement_admin'.
  */
-// $db_name = "entitlement_admin";
+$db_name = "entitlement_admin";
 
 /**
  * @param {Array} $admin_list - The list of admin user credentials
@@ -40,5 +40,14 @@
 // 	array('username' => 'admin1', 'password' => '202cb962ac59075b964b07152d234b70'), // Admin user 1
 // 	array('username' => 'admin2', 'password' => '202cb962ac59075b964b07152d234b70'), // Admin user 2
 // );
+
+/**
+ * @param {String} $identity_provider_type - The type of identity provider.
+ * @example $identity_provider = 'default'; // set default identity provider
+ * @example $identity_provider = 'google'; // set Google as the identity provider
+ * @example $identity_provider = 'facebook'; // set Facebook as the identity provider
+ * Only change below if using Google or Facebook as the identity provider.
+ */
+$identity_provider = 'default';
 
 ?>

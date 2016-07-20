@@ -1,11 +1,13 @@
 AEM Mobile Example Entitlement Server
 ----
 
-Using an entitlement service, Experience Manager Mobile apps can support user login and grant access (entitlement) to certain collections based on the sign-in credentials.
+Using an entitlement service, Experience Manager Mobile Runtimes can support user login and grant access (entitle) to certain collections based on the sign-in credentials.
 
-Please refer to the following help article for the full walkthrough: [Set up an entitlement service](https://helpx.adobe.com/digital-publishing-solution/help/entitlement-service.html);
+Please refer to the following help article for the full walkthrough: [Set up an entitlement service](https://helpx.adobe.com/digital-publishing-solution/help/entitlement-service.html).
 
-__NOTE:__ The example implementation is to be provided as is, Adobe will not provide support on the code, the implementation, or the deployment process. If you have questions about the implementation, please use the AEM Mobile forum.
+This entitlement service now supports the use of Google or Facebook as the Identity Service provider. To do so, update the __$identity_provider__ value in [Configuration](#configuration) to either Google or Facebook. Please refer to the following help article on [use custom authentication in AEM Mobile apps](https://helpx.adobe.com/digital-publishing-solution/help/identity-providers.html).
+
+__NOTE:__ The example implementation is to be provided as is, Adobe will not provide support on the code, the implementation, or the deployment process. If you have questions about the implementation, please refer to the [AEM Mobile forum](https://forums.adobe.com/community/experiencemanagermobile/).
 
 ## Table of Contents
 
@@ -13,7 +15,7 @@ __NOTE:__ The example implementation is to be provided as is, Adobe will not pro
 * [Installation](#installation)
 * [MySQL](#mysql)
 * [Configuration](#configuration)
-* [Website](#website)
+* [Server](#server)
 
 ## [Requirement](#table-of-contents)
 
@@ -46,8 +48,9 @@ __NOTE:__ The example implementation is to be provided as is, Adobe will not pro
     * __$db_password__, set this to the MySQL account password, default is root
     * __$db_name__, set this to the MySQL database name, created in step 3 of [MySQL](#mysql) installation process.
     * __$admin_list__, set this with the list of administrative users with access to the entitlement server.
+    * __$identity_provider__, set this with the identity provider name: default, google, or facebook.
 
-#### [Website](#table-of-contents)
+#### [Server](#table-of-contents)
 
 * Upload all the source code to the root directory of a server with MySQL and PHP installed.
 * Navigate to the index.html page from the server to see the login screen.

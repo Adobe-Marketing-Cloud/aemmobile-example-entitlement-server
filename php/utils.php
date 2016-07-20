@@ -41,11 +41,14 @@ function createAuthToken($s) {
 	return md5("DPS".$s);
 }
 
-function returnErrorResponse() {
+function returnErrorResponse($message = false) {
 	header("Content-Type: application/xml");
 	$xml = simplexml_load_string("<result/>");
 	// Return an error response.
 	$xml->addAttribute("httpResponseCode", '401');
+	if ($message) {
+		$xml-addAttribute('message', $message);
+	}
 	echo $xml->asXML();
 }
 
