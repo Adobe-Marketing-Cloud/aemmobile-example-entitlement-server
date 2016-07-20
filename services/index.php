@@ -6,11 +6,13 @@
  *	- /services/index.php/RenewAuthToken
  */
 
+session_start();
+
 require_once "../php/settings.php";
 require_once "../php/utils.php";
 
 $path_info = $_SERVER["PATH_INFO"];
-$call = substr($path_info,1);
+$call = substr($path_info, 1);
 
 if ($call == "SignInWithCredentials" || $call == "RenewAuthToken" || $call == "entitlements") {
 	$mysqli = new mysqli($db_host, $db_user, $db_password, $db_name);
@@ -74,7 +76,7 @@ function SignInWithCredentials($mysqli) {
 		$stmt = $mysqli->prepare("UPDATE users SET auth_token = ? WHERE guid = ? AND name = ? ");
 		$stmt->bind_param("sss", $authToken, $guid, $emailAddress);
 		$stmt->execute();
-		
+
 		// Output the success xml.
 		header("Content-Type: application/xml");
 		$xml = simplexml_load_string("<result/>");
@@ -106,17 +108,43 @@ function RenewAuthToken($mysqli) {
 }
 
 function entitlements($mysqli) {
+	// retrieves the authToken from the request
 	$authToken = escapeURLData($_REQUEST["authToken"]);
 
-	// Get the group id for this authToken.
-	$stmt = $mysqli->prepare("SELECT id FROM users WHERE auth_token = ?");
-	$stmt->bind_param("s", $authToken);
-	$stmt->execute();
-	$stmt->store_result();
-	$stmt->bind_result($userId);
-	$stmt->fetch();
+	// caches the authToken and userId pair,
+	// this way you don't have to query for the userId every time
+	if (isset($_SESSION[$authToken])) {
+		$userId = $_SESSION[$authToken];
+	} else {
+		// gets the userToken depending on the identity provider setup
+		switch ($identity_provider) {
+			case 'facebook': // Facebook as identity provider
+				// TODO: coming soon...
+				returnErrorResponse();
+				return;
+			case 'google': // Google as identity provider
+				$response = file_get_contents('https://www.googleapis.com/oauth2/v1/userinfo?access_token=' . escapeURLData($authToken));
+				$googleUser = json_decode($response, true);
+				$userToken = $googleUser['email'];
+				$stmt = $mysqli->prepare("SELECT id FROM users WHERE name = ?");
+				break;
+			default: // default identity provider
+				$userToken = $authToken;
+				$stmt = $mysqli->prepare("SELECT id FROM users WHERE auth_token = ?");
+				break;
+		}
+
+		$stmt->bind_param("s", $userToken);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($userId);
+		$stmt->fetch();
+	}
 
 	if ($userId) {
+		// caches the authToken and userId pair
+		$_SESSION[$authToken] = $userId;
+
 		// Create the XML.
 		$xml = simplexml_load_string("<result/>");
 		$xml->addAttribute("httpResponseCode", "200");
