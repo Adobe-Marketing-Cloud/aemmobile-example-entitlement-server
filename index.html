@@ -14,6 +14,9 @@
 	height: 300px;
 	margin-top: 20px;
 }
+#login-container {
+	background-image: url("images/entitlement_login_bg.jpg");
+}
 </style>
 
 </head>
@@ -27,7 +30,7 @@
 			ui-keypress="{13:'submit()'}"
 			ng-submit="submit()">
 			<div id="login-header-container">
-				<img src="images/logo.png" width="34" height="33">
+				<img src="images/entitlement_logo.png" width="34" height="33">
 				<div id="login-header-label">Company Name</div>
 			</div>
 			<input type="input"
@@ -66,7 +69,7 @@
 	<div
 		id="logged-in-container-inner"
 		ng-controller="EntitlementController">
-		<img src="images/header.jpg" width="1200" height="170">
+		<img src="images/entitlement_header.jpg" width="1200" height="170">
 		<a href="#"
 			id="logout-link"
 			ng-click="logoutButton_clickHandler()">Logout</a>
@@ -194,16 +197,11 @@
 <script src="libs/angular.1.2.9.min.js"></script>
 
 <script src="libs/ng-grid.min.js"></script>
-
 <script src="libs/ui-bootstrap-tpls-0.11.0.min.js"></script>
-
 <script src="libs/underscore-1.7.0.min.js"></script>
-
 <script src="libs/jquery.placeholder.js"></script>
-
 <script src="libs/angular-ui-utils/keypress.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js"></script>
+<script src="libs/json3.min.js"></script>
 
 <script src="js/app.js"></script>
 <script src="js/controllers/AddFolioDialogController.js"></script>
@@ -218,13 +216,13 @@
 <script src="js/services.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function() {
-	// For IE placeholder
-	$('input, textarea').placeholder();
+	$(document).ready(function() {
+		// For IE placeholder
+		$('input, textarea').placeholder();
 
-	// Need to manually bootstrap the module otherwise an exception might happen on ie9.
-	angular.bootstrap(document, ["entitlementAdmin"]);
-});
+		// Need to manually bootstrap the module otherwise an exception might happen on ie9.
+		angular.bootstrap(document, ["entitlementAdmin"]);
+	});
 </script>
 </body>
 </html>

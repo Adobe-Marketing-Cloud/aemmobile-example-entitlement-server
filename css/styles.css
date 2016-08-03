@@ -62,7 +62,6 @@ input[type=submit], button {
 	width: 100%;
 	height: 100vh;
 	background-color: #ffffff;
-	background-image: url("../images/login_bg.jpg");
 	background-repeat: no-repeat;
 	background-size: cover;
 	background-position: center;
@@ -73,7 +72,7 @@ input[type=submit], button {
 #login-form-container {
 	margin: 0 auto;
 	padding-top: 350px;
-	width: 464px;
+	max-width: 464px;
 }
 
 #login-form {
