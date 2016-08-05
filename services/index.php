@@ -24,7 +24,7 @@ if ($call == "SignInWithCredentials" || $call == "RenewAuthToken" || $call == "e
 			RenewAuthToken($mysqli);
 			break;
 		case "entitlements":
-			entitlements($mysqli);
+			entitlements($mysqli, $identity_provider);
 			break;
 	}
 } else {
@@ -34,11 +34,10 @@ if ($call == "SignInWithCredentials" || $call == "RenewAuthToken" || $call == "e
 function SignInWithCredentials($mysqli) {
 	$requestBody = file_get_contents('php://input');
 	$xml = simplexml_load_string($requestBody);
-
 	$emailAddress = escapeURLData($xml->emailAddress);
 	$password = escapeURLData($xml->password);
-
-	$appId = escapeURLData($_REQUEST["appId"]);
+	// gets the appId either from same XML (used by custom IDP) or from request
+	$appId = ($xml->appId) ? escapeURLData($xml->appId) : escapeURLData($_REQUEST["appId"]);
 
 	// Check for a matching guid before proceeding.
 	$stmt = $mysqli->prepare("SELECT guid FROM app_ids WHERE app_id = ?");
@@ -107,7 +106,7 @@ function RenewAuthToken($mysqli) {
 	echo $xml->asXML();
 }
 
-function entitlements($mysqli) {
+function entitlements($mysqli, $identity_provider) {
 	// retrieves the authToken from the request
 	$authToken = escapeURLData($_REQUEST["authToken"]);
 
@@ -119,11 +118,13 @@ function entitlements($mysqli) {
 		// gets the userToken depending on the identity provider setup
 		switch ($identity_provider) {
 			case 'facebook': // Facebook as identity provider
-				// TODO: coming soon...
-				returnErrorResponse();
-				return;
+				$response = file_get_contents('https://graph.facebook.com/me?fields=email&access_token=' . urlencode($authToken));
+				$facebookUser = json_decode($response, true);
+				$userToken = $facebookUser['email'];
+				$stmt = $mysqli->prepare("SELECT id FROM users WHERE name = ?");
+				break;
 			case 'google': // Google as identity provider
-				$response = file_get_contents('https://www.googleapis.com/oauth2/v1/userinfo?access_token=' . escapeURLData($authToken));
+				$response = file_get_contents('https://www.googleapis.com/oauth2/v1/userinfo?access_token=' . urlencode($authToken));
 				$googleUser = json_decode($response, true);
 				$userToken = $googleUser['email'];
 				$stmt = $mysqli->prepare("SELECT id FROM users WHERE name = ?");
@@ -144,6 +145,7 @@ function entitlements($mysqli) {
 	if ($userId) {
 		// caches the authToken and userId pair
 		$_SESSION[$authToken] = $userId;
+		session_write_close();
 
 		// Create the XML.
 		$xml = simplexml_load_string("<result/>");

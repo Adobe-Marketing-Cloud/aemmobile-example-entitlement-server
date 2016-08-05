@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Generic Identity Provider</title>
+	<link rel="stylesheet" href="../css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/ng-grid.min.css" media="all" />
+	<link rel="stylesheet" type="text/css" href="../css/styles.css" media="all" />
+
+	<style type="text/css">
+	/* need to put the styles here otherwise the values aren't available when the grids render. */
+	.grid {
+		border: 1px solid rgb(212,212,212);
+		width: 400px;
+		height: 300px;
+		margin-top: 20px;
+	}
+	#login-container {
+		background-image: url("../images/idp_login_bg.jpg");
+	}
+</style>
+
+</head>
+<body ng-controller="LoginController">
+
+	<div id="login-container"
+		ng-show="!isUserLoggedIn">
+		<div id="login-form-container">
+			<form id="login-form"
+				name="loginForm"
+				ui-keypress="{13:'submit()'}"
+				ng-submit="submit()">
+				<div id="login-header-container">
+					<img src="../images/idp_logo.png" width="34" height="33">
+					<div id="login-header-label">Company Name</div>
+				</div>
+				<input type="input"
+					id="adobeId-input"
+					class="form-control"
+					name="adobeId"
+					ng-model="adobeId"
+					required
+					ng-minlength="1"
+					placeholder="Username">
+				<input type="password"
+					id="password-input"
+					name="password"
+					class="form-control"
+					ng-model="password"
+					required
+					ng-minlength="1"
+					placeholder="Password">
+				<div
+					id="login-button"
+					ng-click="submit()"
+					value="Sign in"
+					class="btn btn-primary btn-sm"
+					ng-class="{'busy-cursor': isValidating==true}">
+					Sign In
+				</div>
+				<div class="login-submit-error"
+					ng-bind="loginErrorMessage">
+				</div>
+			</form>
+		</div>
+	</div>
+
+<!-- jquery needed for ui-grid. -->
+<script src="../libs/jquery.1.8.0.min.js"></script>
+<script src="../libs/angular.1.2.9.min.js"></script>
+
+<script src="../libs/ng-grid.min.js"></script>
+<script src="../libs/ui-bootstrap-tpls-0.11.0.min.js"></script>
+<script src="../libs/underscore-1.7.0.min.js"></script>
+<script src="../libs/jquery.placeholder.js"></script>
+<script src="../libs/angular-ui-utils/keypress.js"></script>
+<script src="../libs/json3.min.js"></script>
+
+<script src="../js/app.js"></script>
+<script src="../js/directives/selectOnClick.js"></script>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		// For IE placeholder
+		$('input, textarea').placeholder();
+
+		// Controller for the login dialog.
+		app.controller("LoginController", function($rootScope, $scope, loginService) {
+			$scope.isInvalidLogin = false;
+			// submits the user form if username and password are provided
+			$scope.submit = function() {
+				$scope.loginForm.submitted = $scope.isInvalidLogin = false;
+				$scope.loginErrorMessage = "";
+				if ($scope.loginForm.adobeId.$invalid || $scope.loginForm.password.$invalid) { // Make sure the fields are not empty.
+					$scope.loginErrorMessage = "All fields are required.";
+				} else if ($scope.loginForm.$valid) {
+					$scope.isValidating = true;
+					loginService.login($scope.adobeId, $scope.password).then(
+						function(data) {
+							var xmlData = $.parseXML(data);
+							var $xmlData = $(xmlData);
+							window.$xmlData = $xmlData;
+							$scope.isValidating = false;
+							if ($xmlData.find('result').attr('httpResponseCode') === '200') { // login succeeded
+								window.location = $rootScope.appData.redirectUri + '?authToken=' + $xmlData.find('authToken').text();
+							} else { // login failed
+								$scope.loginErrorMessage = 'The user credentials are invalid, please verify and try again.';
+							}
+						}
+					);
+				} else {
+					$scope.loginForm.submitted = true;
+				}
+			};
+		});
+
+		// Handles user login.
+		app.service("loginService", ["$http", "$rootScope", function($http, $rootScope) {
+			return {
+				// If a guid exists then the user is a valid user.
+				login: function(adobeId, password) {
+					var xmlData  = '<xml>';
+						xmlData += '<emailAddress>' + adobeId + '</emailAddress>';
+						xmlData += '<password>' + password + '</password>';
+						xmlData += '<appId>' + $rootScope.appData.appId + '</appId>';
+						xmlData += '</xml>';
+					// relies on the entitlement::SignInWithCredentials to validate user credentials
+					return $http({
+								method: "POST",
+								url:"../services/index.php/SignInWithCredentials",
+								data: xmlData,
+								headers: {"Content-Type": "application/xml"}
+							}).then(function(result) {
+								return result.data;
+						}
+					);
+				}
+			};
+		}]);
+
+		// On load
+		app.run(function($rootScope) {
+			// parse the URL query parameter,
+			// the .substring(1) will remove the "?" in the search string
+			// i.e. ?redirectUri=https%3A%2F%2Fes.publish.adobe.com%2FgenericAuth&projectId={project_id}&appId={app_bundle_id}&appVersion={app_version}&uuid={device_uuid}
+			var urlParam = window.location.search.substring(1);
+			// the URL query parameter is encoded, so you should decode it before using
+			// before: https%3A%2F%2Fes.publish.adobe.com%2FgenericAuth
+			// after: https://es.publish.adobe.com/genericAuth
+			urlParam = decodeURIComponent(urlParam);
+
+			// store the parameters as an object
+			$rootScope.appData = {};
+			if (urlParam !== '') { // fail-safe
+				var param, paramList = urlParam.split('&');
+				for (var index in paramList) {
+					param = paramList[index].split('=');
+					if (param.length === 2) { // fail-safe
+						$rootScope.appData[param[0]] = param[1];
+					}
+				}
+			}
+			// TODO: remove this, it is for debugging purposes only
+			// view the URL query parameters via Safari/Chrome remote debugging
+			window.appData = $rootScope.appData;
+		});
+
+		// Need to manually bootstrap the module otherwise an exception might happen on ie9.
+		angular.bootstrap(document, ["entitlementAdmin"]);
+	});
+</script>
+</body>
+</html>
