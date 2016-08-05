@@ -3,9 +3,9 @@ AEM Mobile Example Entitlement Server
 
 Using an entitlement service, Experience Manager Mobile Runtimes can support user login and grant access (entitle) to certain collections based on the sign-in credentials.
 
-Please refer to the following help article for the full walkthrough: [Set up an entitlement service](https://helpx.adobe.com/digital-publishing-solution/help/entitlement-service.html).
+This README provides a quick usage guide to the example entitlement server. For full walkthrough, please refer to the following help article: [Set up an entitlement service](https://helpx.adobe.com/digital-publishing-solution/help/entitlement-service.html).
 
-This entitlement service now supports the use of Google or Facebook as the Identity Service provider. To do so, update the __$identity_provider__ value in [Configuration](#configuration) to either Google or Facebook. Please refer to the following help article on [use custom authentication in AEM Mobile apps](https://helpx.adobe.com/digital-publishing-solution/help/identity-providers.html).
+This entitlement service now supports the use of Google or Facebook as the Identity Service provider. To do so, update the __$identity\_provider__ value in [Configuration](#configuration) to either Google or Facebook. In addition, there is the generic identity provider. To use the generic identity provider, leave the __$identity\_provider__ value as is. Please refer to the following help article on [use custom authentication in AEM Mobile apps](https://helpx.adobe.com/digital-publishing-solution/help/identity-providers.html).
 
 __NOTE:__ The example implementation is to be provided as is, Adobe will not provide support on the code, the implementation, or the deployment process. If you have questions about the implementation, please refer to the [AEM Mobile forum](https://forums.adobe.com/community/experiencemanagermobile/).
 
@@ -36,13 +36,13 @@ __NOTE:__ The example implementation is to be provided as is, Adobe will not pro
 6. Select the new database by clicking the new database name in the list.
 7. Navigate to the import page to import the necessary database structure, by clicking the `Import` tab on the top navigation bar.
 8. Open the browse window to select the existing database (.sql) by clicking the `Choose File` option.
-9. Select the existing database file from the new window, __entitlement_admin.sql__, and click the `Choose` button to confirm.
+9. Select the existing database file from the new window, __entitlement\_admin.sql__, and click the `Choose` button to confirm.
 10. Upload the selected database (.sql) by clicking on the `Go` button.
 11. If the database was successfully created, there will be a message similar to the following: _Import has been successfully finished_.
 
 #### [Configuration](#table-of-contents)
 
-* Open the file `settings.php` with an text editor, located in the `Source-Code/php/settings.php`, and update the values for the following parameters:
+* Open the file `settings.php` with an text editor, located in the `<source-code>/php/settings.php`, and update the values for the following parameters:
     * __$db_host__, set this to the MySQL host name
     * __$db_user__, set this to the MySQL account user name, default is root
     * __$db_password__, set this to the MySQL account password, default is root
@@ -54,3 +54,21 @@ __NOTE:__ The example implementation is to be provided as is, Adobe will not pro
 
 * Upload all the source code to the root directory of a server with MySQL and PHP installed.
 * Navigate to the index.html page from the server to see the login screen.
+
+****
+
+## Identity Providers
+
+This example entitlement server supports the usage of Google, Facebook, or Generic Identity Provider. When using Google or Facebook, the AEM Mobile Runtime will provide the `authToken` in the Entitlement V2 API: _/entitlements_. When using Generic Identity Provider, the Runtime will redirect users to the provided custom sign in UI.
+
+#### Using Google or Facebook as the Identity Provider
+
+Since there is not a clear way (100%) of telling apart if the authentication token is from Google or Facebook, you will need to set the __$identity_provider__ to either "google" or "facebook", respectively. This value can be found in `<source-code>/php/settings.php`.
+
+#### Using Generic Identity Provider
+
+The generic identity provider can be found in `<source-code>/idp` directory. From the domain that this example entitlement server will be hosted in, the authentication URL would be as follows:
+
+```
+http://<domain>/<path-to-source-code>/idp/index.html
+```
