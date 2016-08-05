@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Entitlement Admin</title>
-<link rel="stylesheet" href="../css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="../css/ng-grid.min.css" media="all" />
-<link rel="stylesheet" type="text/css" href="../css/styles.css" media="all" />
+	<title>Generic Identity Provider</title>
+	<link rel="stylesheet" href="../css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/ng-grid.min.css" media="all" />
+	<link rel="stylesheet" type="text/css" href="../css/styles.css" media="all" />
 
-<style type="text/css">
-/* need to put the styles here otherwise the values aren't available when the grids render. */
-.grid {
-	border: 1px solid rgb(212,212,212);
-	width: 400px;
-	height: 300px;
-	margin-top: 20px;
-}
-#login-container {
-	background-image: url("../images/idp_login_bg.jpg");
-}
+	<style type="text/css">
+	/* need to put the styles here otherwise the values aren't available when the grids render. */
+	.grid {
+		border: 1px solid rgb(212,212,212);
+		width: 400px;
+		height: 300px;
+		margin-top: 20px;
+	}
+	#login-container {
+		background-image: url("../images/idp_login_bg.jpg");
+	}
 </style>
 
 </head>
@@ -137,22 +137,31 @@
 			};
 		}]);
 
-		// On start
+		// On load
 		app.run(function($rootScope) {
-			// parse the URL matrix parameters
-			var matrixParam = window.location.search.substring(1);
-			$rootScope.appData = {};
+			// parse the URL query parameter,
+			// the .substring(1) will remove the "?" in the search string
+			// i.e. ?redirectUri=https%3A%2F%2Fes.publish.adobe.com%2FgenericAuth&projectId={project_id}&appId={app_bundle_id}&appVersion={app_version}&uuid={device_uuid}
+			var urlParam = window.location.search.substring(1);
+			// the URL query parameter is encoded, so you should decode it before using
+			// before: https%3A%2F%2Fes.publish.adobe.com%2FgenericAuth
+			// after: https://es.publish.adobe.com/genericAuth
+			urlParam = decodeURIComponent(urlParam);
 
 			// store the parameters as an object
-			matrixParam = decodeURIComponent(matrixParam);
-			if (matrixParam !== '') {
-				var param, paramList = matrixParam.split('&');
+			$rootScope.appData = {};
+			if (urlParam !== '') { // fail-safe
+				var param, paramList = urlParam.split('&');
 				for (var index in paramList) {
 					param = paramList[index].split('=');
-					$rootScope.appData[param[0]] = param[1];
+					if (param.length === 2) { // fail-safe
+						$rootScope.appData[param[0]] = param[1];
+					}
 				}
 			}
-			window.matrixParam = $rootScope.appData;
+			// TODO: remove this, it is for debugging purposes only
+			// view the URL query parameters via Safari/Chrome remote debugging
+			window.appData = $rootScope.appData;
 		});
 
 		// Need to manually bootstrap the module otherwise an exception might happen on ie9.

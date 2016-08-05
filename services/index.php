@@ -118,13 +118,13 @@ function entitlements($mysqli, $identity_provider) {
 		// gets the userToken depending on the identity provider setup
 		switch ($identity_provider) {
 			case 'facebook': // Facebook as identity provider
-				$response = file_get_contents('https://graph.facebook.com/me?fields=email&access_token=' . escapeURLData($authToken));
+				$response = file_get_contents('https://graph.facebook.com/me?fields=email&access_token=' . urlencode($authToken));
 				$facebookUser = json_decode($response, true);
 				$userToken = $facebookUser['email'];
 				$stmt = $mysqli->prepare("SELECT id FROM users WHERE name = ?");
 				break;
 			case 'google': // Google as identity provider
-				$response = file_get_contents('https://www.googleapis.com/oauth2/v1/userinfo?access_token=' . escapeURLData($authToken));
+				$response = file_get_contents('https://www.googleapis.com/oauth2/v1/userinfo?access_token=' . urlencode($authToken));
 				$googleUser = json_decode($response, true);
 				$userToken = $googleUser['email'];
 				$stmt = $mysqli->prepare("SELECT id FROM users WHERE name = ?");
